@@ -1,0 +1,181 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ICT02CBM.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+                SELECT INFILE ASSIGN TO INPKS
+                ORGANIZATION IS INDEXED
+                ACCESS MODE  IS SEQUENTIAL
+                RECORD KEY   IS I-STUD-ID
+                FILE STATUS  IS WS-FS1.
+                SELECT OUTFILE ASSIGN TO OUTPS
+                ORGANIZATION IS SEQUENTIAL
+                ACCESS MODE  IS SEQUENTIAL
+                FILE STATUS  IS WS-FS2.
+       DATA DIVISION.
+       FILE SECTION.
+       FD INFILE.
+       01 INREC.
+           02 I-STUD-ID           PIC X(5).
+           02 FILLER              PIC X(01).
+           02 I-STUD-NAME         PIC X(10).
+           02 FILLER              PIC X(01).
+           02 I-NO-OF-ATTEMPTS    PIC X(1).
+           02 FILLER              PIC X(01).
+           02 I-CC-SCORE          PIC X(3).
+           02 FILLER              PIC X(01).
+           02 I-ICT-SCORE         PIC X(3).
+           02 FILLER              PIC X(54).
+       FD OUTFILE.
+       01 OUTREC.
+           02 O-STUD-ID           PIC X(5).
+           02 FILLER              PIC X(01).
+           02 O-STUD-NAME         PIC X(10).
+           02 FILLER              PIC X(01).
+           02 O-CC-SCORE          PIC X(3).
+           02 FILLER              PIC X(01).
+           02 O-ICT-SCORE         PIC X(3).
+           02 FILLER              PIC X(01).
+           02 O-PERCENTAGE        PIC 9(2)V9(3).
+           02 FILLER              PIC X(50).
+       WORKING-STORAGE SECTION.
+       77 WS-FS1                  PIC 9(2).
+       77 WS-FS2                  PIC 9(2).
+       77 WS-REC-CNT              PIC 9(2).
+       77 WS-CC-SCORE             PIC 9(3).
+       77 WS-ICT-SCORE            PIC 9(3).
+       77 WS-PERCENTAGE           PIC 9(2)V9(3).
+       PROCEDURE DIVISION.
+       0000-MAIN-PARA.
+           PERFORM 1000-INITIALIZE-PARA THRU
+                   1000-INITIALIZE-PARA-EXIT.
+           PERFORM 2000-PROCESS-PARA THRU
+                   2000-PROCESS-PARA-EXIT.
+           PERFORM 9000-TERMINATION-PARA THRU
+                   9000-TERMINATION-PARA-EXIT.
+       0000-MAIN-PARA-EXIT.
+           EXIT.
+       1000-INITIALIZE-PARA.
+           INITIALIZE WS-FS1 WS-FS2 WS-REC-CNT.
+       1000-INITIALIZE-PARA-EXIT.
+           EXIT.
+       2000-PROCESS-PARA.
+           PERFORM 2100-OPEN-PARA THRU
+                   2100-OPEN-PARA-EXIT.
+           PERFORM 2200-READ-PARA THRU
+                   2200-READ-PARA-EXIT UNTIL WS-FS1 = 10.
+           PERFORM 3000-CLOSE-PARA THRU
+                   3000-CLOSE-PARA-EXIT.
+       2000-PROCESS-PARA-EXIT.
+           EXIT.
+       2100-OPEN-PARA.
+           OPEN I-O INFILE.
+           EVALUATE TRUE
+             WHEN WS-FS1 = 00
+                  DISPLAY "INFILE OPEN SUCCESS"
+             WHEN OTHER
+                  DISPLAY "INFILE OPEN FAILED" WS-FS1
+             STOP RUN
+           END-EVALUATE.
+           OPEN OUTPUT OUTFILE.
+           EVALUATE TRUE
+             WHEN WS-FS2 = 00
+                  DISPLAY "OUTFILE OPEN SUCCESS"
+             WHEN OTHER
+                  DISPLAY "OUTFILE OPEN FAILED" WS-FS2
+             STOP RUN
+           END-EVALUATE.
+       2100-OPEN-PARA-EXIT.
+           EXIT.
+       2200-READ-PARA.
+           READ INFILE.
+           EVALUATE TRUE
+             WHEN WS-FS1 = 00
+                  ADD 1 TO WS-REC-CNT
+                  PERFORM 2300-UPDATE-PARA THRU
+                          2300-UPDATE-PARA-EXIT
+             WHEN WS-FS1 = 10
+                EVALUATE TRUE
+                  WHEN WS-REC-CNT = 00
+                       DISPLAY "EMPTY FILE"
+                       PERFORM 3000-CLOSE-PARA THRU
+                               3000-CLOSE-PARA-EXIT
+                       PERFORM 9000-TERMINATION-PARA THRU
+                               9000-TERMINATION-PARA-EXIT
+                  WHEN OTHER
+                       DISPLAY "END REACHED"
+                END-EVALUATE
+             WHEN OTHER
+                  DISPLAY "INFILE READ FAILED" WS-FS1
+             STOP RUN
+           END-EVALUATE.
+       2200-READ-PARA-EXIT.
+           EXIT.
+       2300-UPDATE-PARA.
+           MOVE I-CC-SCORE TO WS-CC-SCORE.
+           MOVE I-ICT-SCORE TO WS-ICT-SCORE.
+           IF I-NO-OF-ATTEMPTS = 1
+              COMPUTE WS-CC-SCORE = 15 + WS-CC-SCORE
+              COMPUTE WS-ICT-SCORE = 15 + WS-ICT-SCORE
+           END-IF.
+           MOVE WS-CC-SCORE TO I-CC-SCORE.
+           MOVE WS-ICT-SCORE TO I-ICT-SCORE.
+           PERFORM 2400-REWRITE-PARA THRU
+                   2400-REWRITE-PARA-EXIT.
+       2300-UPDATE-PARA-EXIT.
+           EXIT.
+       2400-REWRITE-PARA.
+           REWRITE INREC.
+           EVALUATE TRUE
+             WHEN WS-FS1 = 00
+                  DISPLAY "INFILE REWRITE SUCCESS"
+             WHEN OTHER
+                  DISPLAY "INFILE REWRITE FAILED" WS-FS1
+             STOP RUN
+           END-EVALUATE.
+           PERFORM 2500-CALL-PARA THRU
+                   2500-CALL-PARA-EXIT.
+       2400-REWRITE-PARA-EXIT.
+           EXIT.
+       2500-CALL-PARA.
+           MOVE I-CC-SCORE TO WS-CC-SCORE.
+           MOVE I-ICT-SCORE TO WS-ICT-SCORE.
+           CALL 'ICT02CBS' USING WS-CC-SCORE WS-ICT-SCORE
+                                 WS-PERCENTAGE.
+           PERFORM 2600-WRITE-PARA THRU
+                   2600-WRITE-PARA-EXIT.
+       2500-CALL-PARA-EXIT.
+           EXIT.
+       2600-WRITE-PARA.
+           MOVE SPACES TO OUTREC.
+           MOVE I-STUD-ID TO O-STUD-ID.
+           MOVE I-STUD-NAME TO O-STUD-NAME.
+           MOVE WS-CC-SCORE TO O-CC-SCORE.
+           MOVE WS-ICT-SCORE TO O-ICT-SCORE.
+           MOVE WS-PERCENTAGE TO O-PERCENTAGE.
+           WRITE OUTREC.
+           EVALUATE TRUE
+             WHEN WS-FS2 = 00
+                  DISPLAY "OUTFILE WRITE SUCCESS"
+             WHEN OTHER
+                  DISPLAY "OUTFILE WRITE FAILED" WS-FS2
+             STOP RUN
+           END-EVALUATE.
+       2600-WRITE-PARA-EXIT.
+           EXIT.
+       3000-CLOSE-PARA.
+           CLOSE INFILE OUTFILE.
+           EVALUATE TRUE
+             WHEN WS-FS1 = 00 AND WS-FS2 = 00
+                  DISPLAY "FILE CLOSE SUCCESS"
+             WHEN OTHER
+                  DISPLAY "FILE CLOSE FAILED" WS-FS1 WS-FS2
+             STOP RUN
+           END-EVALUATE.
+       3000-CLOSE-PARA-EXIT.
+           EXIT.
+       9000-TERMINATION-PARA.
+           STOP RUN.
+       9000-TERMINATION-PARA-EXIT.
+           EXIT.
+

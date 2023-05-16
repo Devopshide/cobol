@@ -1,0 +1,17 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ICT02CBS.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       77 WS-TOTAL                PIC 9(3).
+       LINKAGE SECTION.
+       77 LK-CC-SCORE             PIC 9(3).
+       77 LK-ICT-SCORE            PIC 9(3).
+       77 LK-PERCENTAGE           PIC 9(2)V9(3).
+       PROCEDURE DIVISION USING LK-CC-SCORE LK-ICT-SCORE
+                                LK-PERCENTAGE.
+       0000-MAIN-PARA.
+           COMPUTE WS-TOTAL = LK-CC-SCORE + LK-ICT-SCORE.
+           COMPUTE LK-PERCENTAGE = ( WS-TOTAL / 200 ) * 100.
+       0000-MAIN-PARA-EXIT.
+           GOBACK.
+

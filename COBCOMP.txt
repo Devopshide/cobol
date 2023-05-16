@@ -1,0 +1,6 @@
+//TLAB014@ JOB NOTIFY=&SYSUID                                           00010000
+//      JCLLIB ORDER=TLAB014.MYLIB.COBOL.ICT02                          00020002
+//STEP01   EXEC IGYWCL1,                                                00030001
+//             PGMLIB=TLAB014.MYLIB.LOADLIB,                            00040000
+//             SRCLIB=TLAB014.MYLIB.COBOL.ICT02,                        00050001
+//             GOPGM=ICT02CBM                                           00060004

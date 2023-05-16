@@ -1,0 +1,56 @@
+//IGYWCL   PROC SRCLIB=,                                                00000100
+//         GOPGM=,                                                      00000200
+//         COPYLIB=IBMUSER.COPY.LIB,                                    00000300
+//         PGMLIB=,                                                     00000400
+//         REG=4096K,                                                   00000500
+//         LNKPARM='XREF',                                              00000600
+//         WORK=SYSDA                                                   00000700
+//*                                                                     00000800
+//*******************************************************************   00000900
+//***THIS IS COMPILATION STEP                           *************   00001000
+//*******************************************************************   00001100
+//COBOL    EXEC PGM=IGYCRCTL,REGION=&REG,                               00001200
+//*        PARM='RES,LIB,LIST,OBJECT,APOST,TEST(ALL,SYM,SEPARATE)'      00001300
+//         PARM='LIB,LIST,OBJECT,APOST,TEST(ALL,SYM,SEPARATE)'          00001400
+//STEPLIB  DD  DSN=IGY410.SIGYCOMP,DISP=SHR                             00001500
+//SYSLIB   DD  DSN=&COPYLIB,DISP=SHR                                    00001600
+//SYSPRINT DD  SYSOUT=*                                                 00001700
+//*SYSDEBUG DD  DSN=IBMUSER.COB.DDIO,DISP=SHR                           00001800
+//SYSDEBUG DD  DUMMY                                                    00001900
+//SYSIN    DD  DSN=&SRCLIB(&GOPGM),DISP=SHR                             00002000
+//SYSLIN   DD  DSN=&&LOADSET,DISP=(MOD,PASS),                           00002100
+//             UNIT=&WORK,SPACE=(80,(250,100))                          00002200
+//SYSUT1   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002300
+//SYSUT2   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002400
+//SYSUT3   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002500
+//SYSUT4   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002600
+//SYSUT5   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002700
+//SYSUT6   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002800
+//SYSUT7   DD  UNIT=&WORK,SPACE=(460,(350,100))                         00002900
+//*                                                                     00003000
+//*******************************************************************   00003100
+//***      LINK EDIT STEP             *******************************   00003200
+//*******************************************************************   00003300
+//*LINK-EDIT STEP                                                       00003400
+//*                                                                     00003500
+//LKED     EXEC PGM=IEWL,REGION=&REG,                                   00003600
+//         PARM=&LNKPARM,COND=(5,LT)                                    00003700
+//SYSLIB   DD  DSN=CEE.SCEELKED,DISP=SHR                                00003800
+//*SYSLIB   DD  DSN=SYS1.LINKLIB,DISP=SHR                               00003900
+//         DD  DSN=&PGMLIB,DISP=SHR                                     00004000
+//SYSLMOD  DD  DSN=&PGMLIB(&GOPGM),DISP=SHR                             00004100
+//SYSUT1   DD  UNIT=&WORK,DCB=BLKSIZE=1024,                             00004200
+//             SPACE=(1024,(200,20))                                    00004300
+//SYSPRINT DD  SYSOUT=*                                                 00004400
+//SYSLIN   DD  DSN=&&LOADSET,DISP=(OLD,DELETE)                          00004500
+//*        DD  DSN=CICSVS.COBLIB(LINKDB2),DISP=SHR                      00004600
+//         DD  DDNAME=SYSIN                                             00004700
+//         PEND                                                         00004800
+//*******************************************************************   00004900
+//**  MAKE CHANGES HERE ONLY   **************************************   00005000
+//**  SRCLIB IS YOUR COBOL SOURCE LIBRARY  **************************   00005100
+//**  GOPGM IS THE PARAMETER TO SPECIFY THE MEMBER OF SRCLIB ********** 00005200
+//**  PGMLIB IS THE LOAD LIBRARY WHERE UR EXECUTABLE MODULE IS   ****** 00005300
+//**  PLACED  ********************************************              00005400
+//********************************************************************* 00005500
+
